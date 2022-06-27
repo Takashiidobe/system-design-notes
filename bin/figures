@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+for i in $(find ./graphviz -name '*.dot'); do
+  dir=$(dirname $i)
+  inbetween_paths=$(basename $dir)
+  base=$(basename $i .dot)
+  mkdir -p "./figures/$inbetween_paths/"
+  out_name="./figures/$inbetween_paths/$base.svg"
+  echo "Building $out_name"
+  dot -Tsvg $i -o $out_name
+done

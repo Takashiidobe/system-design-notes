@@ -1,0 +1,70 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  release:
+    name: build
+    runs-on: macos-latest
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+      - name: Add pip to $PATH
+        run: |
+          echo "$HOME/Library/Python/3.9/bin" >> $GITHUB_PATH
+          # - name: Install basictex
+          #   run: |
+          #     brew install basictex
+          # - name: Add pdflatex to current shell
+          #   run: |
+          #     eval "$(/usr/libexec/path_helper)"
+          # - name: Add pdflatex to $PATH
+          #   run: |
+          #     echo "/Library/TeX/texbin" >> $GITHUB_PATH
+      - name: Install pandoc
+        run: |
+          brew install pandoc
+      - name: Install pandoc-include-code
+        run: |
+          brew install pandoc-include-code
+      - name: Install pandoc-include
+        run: |
+          pip3 install --user pandoc-include
+      - name: Install librsvg
+        run: |
+          brew install librsvg
+      - name: Make pandoc templates dir
+        run: |
+          mkdir -p $HOME/.pandoc/templates
+      - name: Fetch Eisvogel template
+        run: |
+          wget "https://github.com/Wandmalfarbe/pandoc-latex-template/releases/download/v2.0.0/Eisvogel-2.0.0.tar.gz" -P $HOME/
+      - name: Uncompress Eisvogel template
+        run: |
+          tar -xvf $HOME/Eisvogel-2.0.0.tar.gz --directory=$HOME
+      - name: Move Eisvogel template to Pandoc template dir
+        run: |
+          mv $HOME/eisvogel.latex $HOME/.pandoc/templates
+      - name: Make output dir
+        run: |
+          mkdir -p output/
+      - name: Build books
+        run: |
+          make html && make index
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v1.2
+        with:
+          publish-dir: './output'
+          production-branch: master
+          production-deploy: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: "Deploy from GitHub Actions"
+          enable-pull-request-comment: false
+          enable-commit-comment: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 1
