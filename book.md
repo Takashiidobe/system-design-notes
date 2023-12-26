@@ -1,5 +1,5 @@
 ---
-title: "Book Template"
+title: "System Design Notes"
 bibliography: references.bib
 citation-style: nature.csl
 link-citations: true
@@ -9,4 +9,6 @@ header-includes: |
 
 !include chapters/introduction/index.md
 
-## References
+!include chapters/storing-data/index.md
+
+# References

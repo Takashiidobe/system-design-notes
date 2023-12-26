@@ -1,10 +1,9 @@
 .PHONY: phony
 
-BOOK_NAME="Book Template"
+BOOK_NAME="System Design Notes"
 GRAPHVIZ_FILES = $(shell find ./graphviz -name '*.dot')
 FIGURES = $(shell find ./figures -name '*.svg')
 CHAPTERS = $(shell find ./chapters -name '*.md')
-SOURCE_FILES = $(shell find ./src -name '*.rs')
 
 PANDOCFLAGS =                        \
 	--bibliography references.bib      \
@@ -13,14 +12,14 @@ PANDOCFLAGS =                        \
   --number-sections                  \
 	--top-level-division=chapter       \
 	--filter=pandoc-include            \
-	--filter=pandoc-include-code       \
 	--citeproc 												 \
   --indented-code-classes=rust
 
 HTML_FLAGS =                         \
 	--metadata title=$(BOOK_NAME)      \
 	--template=./templates/book.html   \
-	--self-contained
+	--embed-resources                  \
+	--standalone
 
 PDF_FLAGS =                          \
   --pdf-engine=xelatex               \
