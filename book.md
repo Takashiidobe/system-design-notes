@@ -13,4 +13,10 @@ header-includes: |
 
 !include chapters/querying-data/index.md
 
+!include chapters/indexing/index.md
+
+!include chapters/serializing-data/index.md
+
+!include chapters/networking/index.md
+
 # References
