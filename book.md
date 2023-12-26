@@ -11,4 +11,6 @@ header-includes: |
 
 !include chapters/storing-data/index.md
 
+!include chapters/querying-data/index.md
+
 # References
