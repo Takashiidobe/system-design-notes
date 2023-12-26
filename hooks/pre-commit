@@ -2,6 +2,6 @@
 
 ./bin/figures
 
-make html && make pdf && make docx && make epub
+make html && make pdf && make docx && make epub && make md
 
 git add output/

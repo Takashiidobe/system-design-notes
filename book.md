@@ -1,8 +1,6 @@
 ---
 title: "System Design Notes"
-bibliography: references.bib
-citation-style: nature.csl
-link-citations: true
+colorlinks: true
 header-includes: |
   \renewcommand{\chapterheadstartvskip}{}
 ---
@@ -18,5 +16,3 @@ header-includes: |
 !include chapters/serializing-data/index.md
 
 !include chapters/networking/index.md
-
-# References

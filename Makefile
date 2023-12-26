@@ -6,13 +6,11 @@ FIGURES = $(shell find ./figures -name '*.svg')
 CHAPTERS = $(shell find ./chapters -name '*.md')
 
 PANDOCFLAGS =                        \
-	--bibliography references.bib      \
   --table-of-contents                \
   --from=markdown                    \
   --number-sections                  \
 	--top-level-division=chapter       \
 	--filter=pandoc-include            \
-	--citeproc 												 \
   --indented-code-classes=rust
 
 HTML_FLAGS =                         \
@@ -21,18 +19,26 @@ HTML_FLAGS =                         \
 	--embed-resources                  \
 	--standalone
 
+MD_FLAGS =                           \
+	--metadata title=$(BOOK_NAME)      \
+	--embed-resources                  \
+	--standalone
+
 PDF_FLAGS =                          \
   --pdf-engine=xelatex               \
 	--template=eisvogel                \
 	-V toc-own-page=false              \
-  -V mainfont="Palatino"             \
+  -V mainfont="TeX Gyre Pagella"     \
   -V documentclass=krantz            \
   -V papersize=A4                    \
 	-V book=true                       \
 	-V titlepage=true                  \
-	-V classoption=oneside
+	-V classoption=oneside             \
+	-V colorlinks=true                 \
 
 html: phony output/index.html output/book.html
+
+md: phony output/book.md | output copy_readme
 
 epub: phony output/book.epub
 
@@ -57,8 +63,14 @@ output/%.epub: %.md $(FIGURES) $(SOURCE_FILES) $(CHAPTERS) Makefile | output fig
 output/%.html: %.md $(FIGURES) $(SOURCE_FILES) $(CHAPTERS) Makefile templates/book.html | output figures
 	pandoc $< -o $@ $(HTML_FLAGS) $(PANDOCFLAGS)
 
+output/%.md: %.md $(FIGURES) $(SOURCE_FILES) $(CHAPTERS) Makefile templates/book.html | output figures
+	pandoc $< -o $@ $(MD_FLAGS) $(PANDOCFLAGS)
+
 output/%.docx: %.md $(FIGURES) $(SOURCE_FILES) $(CHAPTERS) Makefile | output figures
 	pandoc $< -o $@ $(PANDOCFLAGS)
+
+copy_readme: output/book.md
+	cp output/book.md README.md
 
 output:
 	mkdir ./output

@@ -39,9 +39,63 @@ Another way is to write in parallel, where the system has a few disk drives and 
 
 Another way of improving performance is not to persist the write immediately, but to use a write-ahead-log, which appends writes to a file indicating the operations that are to be persisted to disk, before doing the operation. By doing this, even if the computer loses power, the computer can reconstruct its state on reboot.
 
+### Writing Asynchronously
+
+Another way is to read and write asynchronously, supported by the `aio_*` unix APIs.
+
+For some numbers, I benchmarked my own setup:
+
+Using the synchronous unix APIs (`read`, `write`):
+
+- synchronous sequential write - fsync: ~2.4k ops/s, (623MB/s)
+- synchronous sequential write + fsync: ~850 ops/s, (222MB/s)
+- synchronous random write - fsync: ~2.4k ops/s, (644MB/s)
+- synchronous random write + fsync: ~800 ops/s, (214MB/s)
+- synchronous sequential read: ~2.9k ops/s, (757MB/s)
+- synchronous random read: ~2.2k ops/s, (575MB/s)
+
+With `aio_*`:
+
+- asynchronous sequential write - fsync: ~2.3k ops/s, (599MB/s)
+- asynchronous sequential write + fsync: ~800 ops/s, (212MB/s)
+- asynchronous random write - fsync: ~2.3k ops/s, (592MB/s)
+- asynchronous random write + fsync: ~800 ops/s, (217MB/s)
+- asynchronous sequential read: ~3k ops/s, (763MB/s)
+- asynchronous random read: ~2.1k ops/s, (561MB/s)
+
+The asynchronous APIs aren't that much better on Linux on my setup, only for sequential writes.
+
+### Avoiding the OS' Page Cache
+
+Another way of improving performance that databases use is to avoid the Operating System's Page cache. This allows for faster performance, but is tricky to implement. Databases might use this pretty frequently.
+
+The numbers using the synchronous unix APIs (`read`, `write`) again:
+
+- synchronous sequential write - fsync: ~2.4k ops/s, (623MB/s)
+- synchronous sequential write + fsync: ~850 ops/s, (222MB/s)
+- synchronous random write - fsync: ~2.4k ops/s, (644MB/s)
+- synchronous random write + fsync: ~800 ops/s, (214MB/s)
+- synchronous sequential read: ~2.9k ops/s, (757MB/s)
+- synchronous random read: ~2.2k ops/s, (575MB/s)
+
+Using `io_uring`, which avoids the operating system's cache:
+
+- io_uring sequential write - fsync: ~2.8k ops/s, (723MB/s)
+- io_uring sequential write + fsync: ~2.5k ops/s, (653MB/s)
+- io_uring random write - fsync: ~3.3k ops/s, (872MB/s)
+- io_uring random write + fsync: ~2.4k ops/s, (639MB/s)
+- io_uring sequential read: ~15k ops/s, (3876MB/s)
+- io_uring random read: ~7.5k ops/s, (1997MB/s)
+
+`io_uring` offers some improvements.
+
 ### Do everything
 
-You can also do all of the above. Since your filesystem probably caches writes, and your OS also caches writes, and your storage device also has a write cache, your writes are effectively batched. Your SSD also implements writing to blocks in parallel in its firmware, so there is some level of writing in parallel. In practice, databases backed by SSDs can write batched rows, so sqlite can do something ~23k writes per second on an NVMe drive, while using a WAL for durability. That's a lot better than the ~1k writes per second an average SSD might be able to do.
+You can also do all of the above. Since your filesystem probably caches writes, and your OS also caches writes, and your storage device also has a write cache, your writes are effectively batched. Your SSD also implements writing to blocks in parallel in its firmware, so there is some level of writing in parallel. In practice, databases backed by SSDs can write batched rows, so sqlite can do many more writes per second than 1k on an NVMe drive, while using a WAL for durability. That's a lot better than the ~1k writes per second an average SSD would be able to write using `fsync`.
+
+Let's bring it all together: how much faster do all these optimizations make writing to disk? I benchmarked my own laptop, a 16 core 12th Gen Intel i5-1240P with a Western Digital SN750, rated at 3400 MB/s sequential read, 2900 MB/s sequential write.
+
+On this disk, it's possible to write **23k** rows per second, so each write takes about **40 microseconds**, instead of the expected **1ms**.
 
 ```
 ./sqlite-bench -batch-count 1000000 -batch-size 1 -row-size 1000 -journal-mode wal -synchronous normal ./bench.db
@@ -50,3 +104,15 @@ Elapsed:   43.839s
 Rate:      22810.910 insert/sec
 File size: 1026584576 bytes
 ```
+
+But we can batch more. Batching at the SQL level, 1000 rows per batch, our throughput has increased to **130k** rows per second, so each row write takes only **8 microseconds**.
+
+```
+./sqlite-bench -batch-count 1000 -batch-size 1000 -row-size 1000 -journal-mode wal -synchronous normal ./bench.db
+Inserts:   1000000 rows
+Elapsed:   7.824s
+Rate:      127817.265 insert/sec
+File size: 1026584576 bytes
+```
+
+This is enough to write **11 billion rows** each carrying 4KB a day on my laptop. With just `fsync` and none of these optimizations, it'd be closer to **10 million**, or a 1000x increase. I'd have to replace my SSD once every few days to handle that kind of write bandwidth, but it goes to show how much one computer can do these days with a $250 CPU and a $100 SSD.
