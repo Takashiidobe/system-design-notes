@@ -1,108 +1,115 @@
 ---
-bibliography: references.bib
-citation-style: nature.csl
-header-includes: |
-  ```{=tex}
-  \renewcommand{\chapterheadstartvskip}{}
-  ```
-link-citations: true
 title: System Design Notes
 ---
 
-```{=tex}
-\renewcommand{\chapterheadstartvskip}{}
-```
-
--   [[1]{.toc-section-number}
-    Introduction](#introduction){#toc-introduction}
-    -   [[1.1]{.toc-section-number} A Gaming
-        Server](#a-gaming-server){#toc-a-gaming-server}
-    -   [[1.2]{.toc-section-number} All good things must come to an
-        end](#all-good-things-must-come-to-an-end){#toc-all-good-things-must-come-to-an-end}
-    -   [[1.3]{.toc-section-number} The Server slows
-        down](#the-server-slows-down){#toc-the-server-slows-down}
-    -   [[1.4]{.toc-section-number}
-        Conclusion](#conclusion){#toc-conclusion}
--   [[2]{.toc-section-number} Storing
-    Data](#storing-data){#toc-storing-data}
-    -   [[2.1]{.toc-section-number} RAM vs
-        Disk](#ram-vs-disk){#toc-ram-vs-disk}
-    -   [[2.2]{.toc-section-number} Files](#files){#toc-files}
-    -   [[2.3]{.toc-section-number} Speeding up
-        writes](#speeding-up-writes){#toc-speeding-up-writes}
-        -   [[2.3.1]{.toc-section-number} Batching
-            Writes](#batching-writes){#toc-batching-writes}
-        -   [[2.3.2]{.toc-section-number} Writing in
-            Parallel](#writing-in-parallel){#toc-writing-in-parallel}
-        -   [[2.3.3]{.toc-section-number} Writing to a Write Ahead
-            Log](#writing-to-a-write-ahead-log){#toc-writing-to-a-write-ahead-log}
-        -   [[2.3.4]{.toc-section-number} Do
-            everything](#do-everything){#toc-do-everything}
--   [[3]{.toc-section-number} Querying
-    Data](#querying-data){#toc-querying-data}
-    -   [[3.1]{.toc-section-number} Relational
-        Databases](#relational-databases){#toc-relational-databases}
-    -   [[3.2]{.toc-section-number} NoSQL
-        Databases](#nosql-databases){#toc-nosql-databases}
-    -   [[3.3]{.toc-section-number} The Problems with Distributed
-        Systems](#the-problems-with-distributed-systems){#toc-the-problems-with-distributed-systems}
--   [[4]{.toc-section-number} Indexing](#indexing){#toc-indexing}
-    -   [[4.1]{.toc-section-number} The many kinds of
-        indexes](#the-many-kinds-of-indexes){#toc-the-many-kinds-of-indexes}
-    -   [[4.2]{.toc-section-number} The Venerable
-        B-Tree](#the-venerable-b-tree){#toc-the-venerable-b-tree}
-    -   [[4.3]{.toc-section-number} The Hash
-        Index](#the-hash-index){#toc-the-hash-index}
-    -   [[4.4]{.toc-section-number} Spatial
-        Indexes](#spatial-indexes){#toc-spatial-indexes}
-    -   [[4.5]{.toc-section-number} Inverted
-        Indexes](#inverted-indexes){#toc-inverted-indexes}
--   [[5]{.toc-section-number} Serializing
-    Data](#serializing-data){#toc-serializing-data}
-    -   [[5.1]{.toc-section-number} Text Encodings (like
-        JSON)](#text-encodings-like-json){#toc-text-encodings-like-json}
-    -   [[5.2]{.toc-section-number} Binary Encodings (like
-        Protobuf)](#binary-encodings-like-protobuf){#toc-binary-encodings-like-protobuf}
--   [[6]{.toc-section-number} Networking](#networking){#toc-networking}
-    -   [[6.1]{.toc-section-number} How does the Internet
-        work?](#how-does-the-internet-work){#toc-how-does-the-internet-work}
-    -   [[6.2]{.toc-section-number} How do you have a distributed system
-        with many
-        nodes?](#how-do-you-have-a-distributed-system-with-many-nodes){#toc-how-do-you-have-a-distributed-system-with-many-nodes}
-    -   [[6.3]{.toc-section-number} How do
-        you](#how-do-you){#toc-how-do-you}
--   [[7]{.toc-section-number} References](#references){#toc-references}
+- <a href="#introduction" id="toc-introduction"><span
+  class="toc-section-number">1</span> Introduction</a>
+  - <a href="#a-gaming-server" id="toc-a-gaming-server"><span
+    class="toc-section-number">1.1</span> A Gaming Server</a>
+  - <a href="#all-good-things-must-come-to-an-end"
+    id="toc-all-good-things-must-come-to-an-end"><span
+    class="toc-section-number">1.2</span> All good things must come to an
+    end</a>
+  - <a href="#the-server-slows-down" id="toc-the-server-slows-down"><span
+    class="toc-section-number">1.3</span> The Server slows down</a>
+  - <a href="#conclusion" id="toc-conclusion"><span
+    class="toc-section-number">1.4</span> Conclusion</a>
+- <a href="#storing-data" id="toc-storing-data"><span
+  class="toc-section-number">2</span> Storing Data</a>
+  - <a href="#ram-vs-disk" id="toc-ram-vs-disk"><span
+    class="toc-section-number">2.1</span> RAM vs Disk</a>
+  - <a href="#files" id="toc-files"><span
+    class="toc-section-number">2.2</span> Files</a>
+  - <a href="#speeding-up-writes" id="toc-speeding-up-writes"><span
+    class="toc-section-number">2.3</span> Speeding up writes</a>
+    - <a href="#batching-writes" id="toc-batching-writes"><span
+      class="toc-section-number">2.3.1</span> Batching Writes</a>
+    - <a href="#writing-in-parallel" id="toc-writing-in-parallel"><span
+      class="toc-section-number">2.3.2</span> Writing in Parallel</a>
+    - <a href="#writing-to-a-write-ahead-log"
+      id="toc-writing-to-a-write-ahead-log"><span
+      class="toc-section-number">2.3.3</span> Writing to a Write Ahead Log</a>
+    - <a href="#writing-asynchronously" id="toc-writing-asynchronously"><span
+      class="toc-section-number">2.3.4</span> Writing Asynchronously</a>
+    - <a href="#avoiding-the-os-page-cache"
+      id="toc-avoiding-the-os-page-cache"><span
+      class="toc-section-number">2.3.5</span> Avoiding the OS’ Page Cache</a>
+    - <a href="#do-everything" id="toc-do-everything"><span
+      class="toc-section-number">2.3.6</span> Do everything</a>
+- <a href="#querying-data" id="toc-querying-data"><span
+  class="toc-section-number">3</span> Querying Data</a>
+  - <a href="#relational-databases" id="toc-relational-databases"><span
+    class="toc-section-number">3.1</span> Relational Databases</a>
+  - <a href="#nosql-databases" id="toc-nosql-databases"><span
+    class="toc-section-number">3.2</span> NoSQL Databases</a>
+  - <a href="#the-problems-with-distributed-systems"
+    id="toc-the-problems-with-distributed-systems"><span
+    class="toc-section-number">3.3</span> The Problems with Distributed
+    Systems</a>
+- <a href="#indexing" id="toc-indexing"><span
+  class="toc-section-number">4</span> Indexing</a>
+  - <a href="#the-many-kinds-of-indexes"
+    id="toc-the-many-kinds-of-indexes"><span
+    class="toc-section-number">4.1</span> The many kinds of indexes</a>
+  - <a href="#the-venerable-b-tree" id="toc-the-venerable-b-tree"><span
+    class="toc-section-number">4.2</span> The Venerable B-Tree</a>
+  - <a href="#the-hash-index" id="toc-the-hash-index"><span
+    class="toc-section-number">4.3</span> The Hash Index</a>
+  - <a href="#spatial-indexes" id="toc-spatial-indexes"><span
+    class="toc-section-number">4.4</span> Spatial Indexes</a>
+  - <a href="#inverted-indexes" id="toc-inverted-indexes"><span
+    class="toc-section-number">4.5</span> Inverted Indexes</a>
+- <a href="#serializing-data" id="toc-serializing-data"><span
+  class="toc-section-number">5</span> Serializing Data</a>
+  - <a href="#text-encodings-like-json"
+    id="toc-text-encodings-like-json"><span
+    class="toc-section-number">5.1</span> Text Encodings (like JSON)</a>
+  - <a href="#binary-encodings-like-protobuf"
+    id="toc-binary-encodings-like-protobuf"><span
+    class="toc-section-number">5.2</span> Binary Encodings (like
+    Protobuf)</a>
+- <a href="#networking" id="toc-networking"><span
+  class="toc-section-number">6</span> Networking</a>
+  - <a href="#how-does-the-internet-work"
+    id="toc-how-does-the-internet-work"><span
+    class="toc-section-number">6.1</span> How does the Internet work?</a>
+  - <a href="#how-do-you-have-a-distributed-system-with-many-nodes"
+    id="toc-how-do-you-have-a-distributed-system-with-many-nodes"><span
+    class="toc-section-number">6.2</span> How do you have a distributed
+    system with many nodes?</a>
+  - <a href="#how-do-you" id="toc-how-do-you"><span
+    class="toc-section-number">6.3</span> How do you</a>
 
 # Introduction
 
-Let's learn about how to make high scale websites. Each chapter will
+Let’s learn about how to make high scale websites. Each chapter will
 start out with a story of a system to build, and the book will go into
-depth about some of the trade-offs delved into. It's important to ask
-clarifying questions, so we don't build the wrong thing, and to make
+depth about some of the trade-offs delved into. It’s important to ask
+clarifying questions, so we don’t build the wrong thing, and to make
 sure we meet the goals of the system, since technology exists to fulfill
 needs in the real world.
 
 ## A Gaming Server
 
-We'll start out with a smaller scale system for this chapter. Imagine
+We’ll start out with a smaller scale system for this chapter. Imagine
 you want to play Minecraft with your friends, and have decided to host
 your own server. Normally, you would have one of your friends host the
-server, but that doesn't have enough availability for you. If the
+server, but that doesn’t have enough availability for you. If the
 assigned friend who owns the server data goes on vacation, they would
 have to hand off the server data to another friend, and all your friends
 have to update their settings to login to that server. As well, if the
 first friend who runs the server goes on an unplanned vacation, the
-server won't be running, so the rest of you can't play.
+server won’t be running, so the rest of you can’t play.
 
 One of your friends could use an old computer as the server, but that
-comes with its own issues -- they would need to somehow have a static
-ip, and if the power goes out, they would have to turn back on the
-server. Also, if the computer fails, or the hard drive fails, then the
-server's data could be lost forever. Also, that friend would have to
-always maintain a good enough internet connection for your friends to
-connect to (lag is the enemy of all gamers, after all).
+comes with its own issues – they would need to somehow have a static ip,
+and if the power goes out, they would have to turn back on the server.
+Also, if the computer fails, or the hard drive fails, then the server’s
+data could be lost forever. Also, that friend would have to always
+maintain a good enough internet connection for your friends to connect
+to (lag is the enemy of all gamers, after all).
 
-You've decided to rent out a Virtual Private Server (VPS), and pay
+You’ve decided to rent out a Virtual Private Server (VPS), and pay
 someone else to maintain the hardware, electricity, and internet
 connection. This costs \$5 a month to get rid of all the headache of
 managing the actual computer that will act as our server.
@@ -114,23 +121,23 @@ ports, and you have yourself a working system. Congratulations!
 ## All good things must come to an end
 
 After playing on the server has gone smoothly for months, one day, you
-login to your beloved server and find that you have been "griefed". You
+login to your beloved server and find that you have been “griefed”. You
 and your friends were trying to build a replica of the Space Station in
-Minecraft, but it has been dynamited to smithereens. Who could've done
+Minecraft, but it has been dynamited to smithereens. Who could’ve done
 this? Sadly, Nobody knows.
 
 Before pointing fingers, you remember that anybody can log into your
-server, as you didn't require any authentication, so it doesn't have to
-be one of your friends. That's a relief.
+server, as you didn’t require any authentication, so it doesn’t have to
+be one of your friends. That’s a relief.
 
 Secondly, to make sure nothing like this happens again, you start to
-think about enabling audits on the server. You'd like to know who logs
-in, and having every action they make jotted down, so you know who's a
+think about enabling audits on the server. You’d like to know who logs
+in, and having every action they make jotted down, so you know who’s a
 nefarious actor to ban from the server if they do anything bad.
 
-But that won't bring back the state of the server. You suggest creating
-backups -- every day, you save the state of the server, and write it to
-a file. This file is saved on the server, and an administrator can
+But that won’t bring back the state of the server. You suggest creating
+backups – every day, you save the state of the server, and write it to a
+file. This file is saved on the server, and an administrator can
 rollback to any previous state. Since our server is pretty small, and we
 have plenty of space for now, you store backups for a year.
 
@@ -143,12 +150,12 @@ Wonderful. Now you can sleep peacefully.
 
 ## The Server slows down
 
-Your system works well -- so well, in fact, that your friends start
+Your system works well – so well, in fact, that your friends start
 referring their friends to join your server, and they refer their
 friends too! You now have so many players at any given time that the
 server you originally rented out is starting to lag during peak hours.
-That's not good. You rent out a bigger computer from your VPS provider,
-and everyone is happy for a bit. Until it happens again. You can't
+That’s not good. You rent out a bigger computer from your VPS provider,
+and everyone is happy for a bit. Until it happens again. You can’t
 afford a bigger computer, so you decide to dig in and learn more.
 
 You need some analytics. You decide to install Grafana and Prometheus,
@@ -182,7 +189,7 @@ electricity. For an SSD, electricity is used to write to transistors
 which keep the state of the drive in a way that allows it to survive
 without continuous power.
 
-We'll call volatile memory `RAM`, and non-volatile memory `Disk`.
+We’ll call volatile memory `RAM`, and non-volatile memory `Disk`.
 
 ## Files
 
@@ -215,7 +222,7 @@ Imagine your disk chooses to batch every `n` writes. If so, each first
 write in a batch of `n` writes now takes on average one fsync + the
 amount of time it takes your system to gather up `n` writes. This
 increases the amount of data that is written, at the cost of latency. As
-well, a write isn't persistent until it is written to disk. Thus, there
+well, a write isn’t persistent until it is written to disk. Thus, there
 is another choice: either the system says a write has completed before
 it is safely persisted to disk, which is more responsive but not
 persistent, or only say a write has completed after it is safely
@@ -239,6 +246,60 @@ file indicating the operations that are to be persisted to disk, before
 doing the operation. By doing this, even if the computer loses power,
 the computer can reconstruct its state on reboot.
 
+### Writing Asynchronously
+
+Another way is to read and write asynchronously, supported by the
+`aio_*` unix APIs.
+
+For some numbers, I benchmarked my own setup:
+
+Using the synchronous unix APIs (`read`, `write`):
+
+- synchronous sequential write - fsync: \~2.4k ops/s, (623MB/s)
+- synchronous sequential write + fsync: \~850 ops/s, (222MB/s)
+- synchronous random write - fsync: \~2.4k ops/s, (644MB/s)
+- synchronous random write + fsync: \~800 ops/s, (214MB/s)
+- synchronous sequential read: \~2.9k ops/s, (757MB/s)
+- synchronous random read: \~2.2k ops/s, (575MB/s)
+
+With `aio_*`:
+
+- asynchronous sequential write - fsync: \~2.3k ops/s, (599MB/s)
+- asynchronous sequential write + fsync: \~800 ops/s, (212MB/s)
+- asynchronous random write - fsync: \~2.3k ops/s, (592MB/s)
+- asynchronous random write + fsync: \~800 ops/s, (217MB/s)
+- asynchronous sequential read: \~3k ops/s, (763MB/s)
+- asynchronous random read: \~2.1k ops/s, (561MB/s)
+
+The asynchronous APIs aren’t that much better on Linux on my setup, only
+for sequential writes.
+
+### Avoiding the OS’ Page Cache
+
+Another way of improving performance that databases use is to avoid the
+Operating System’s Page cache. This allows for faster performance, but
+is tricky to implement. Databases might use this pretty frequently.
+
+The numbers using the synchronous unix APIs (`read`, `write`) again:
+
+- synchronous sequential write - fsync: \~2.4k ops/s, (623MB/s)
+- synchronous sequential write + fsync: \~850 ops/s, (222MB/s)
+- synchronous random write - fsync: \~2.4k ops/s, (644MB/s)
+- synchronous random write + fsync: \~800 ops/s, (214MB/s)
+- synchronous sequential read: \~2.9k ops/s, (757MB/s)
+- synchronous random read: \~2.2k ops/s, (575MB/s)
+
+Using `io_uring`, which avoids the operating system’s cache:
+
+- io_uring sequential write - fsync: \~2.8k ops/s, (723MB/s)
+- io_uring sequential write + fsync: \~2.5k ops/s, (653MB/s)
+- io_uring random write - fsync: \~3.3k ops/s, (872MB/s)
+- io_uring random write + fsync: \~2.4k ops/s, (639MB/s)
+- io_uring sequential read: \~15k ops/s, (3876MB/s)
+- io_uring random read: \~7.5k ops/s, (1997MB/s)
+
+`io_uring` offers some improvements.
+
 ### Do everything
 
 You can also do all of the above. Since your filesystem probably caches
@@ -246,16 +307,41 @@ writes, and your OS also caches writes, and your storage device also has
 a write cache, your writes are effectively batched. Your SSD also
 implements writing to blocks in parallel in its firmware, so there is
 some level of writing in parallel. In practice, databases backed by SSDs
-can write batched rows, so sqlite can do something \~23k writes per
-second on an NVMe drive, while using a WAL for durability. That's a lot
-better than the \~1k writes per second an average SSD might be able to
-do.
+can write batched rows, so sqlite can do many more writes per second
+than 1k on an NVMe drive, while using a WAL for durability. That’s a lot
+better than the \~1k writes per second an average SSD would be able to
+write using `fsync`.
+
+Let’s bring it all together: how much faster do all these optimizations
+make writing to disk? I benchmarked my own laptop, a 16 core 12th Gen
+Intel i5-1240P with a Western Digital SN750, rated at 3400 MB/s
+sequential read, 2900 MB/s sequential write.
+
+On this disk, it’s possible to write **23k** rows per second, so each
+write takes about **40 microseconds**, instead of the expected **1ms**.
 
     ./sqlite-bench -batch-count 1000000 -batch-size 1 -row-size 1000 -journal-mode wal -synchronous normal ./bench.db
     Inserts:   1000000 rows
     Elapsed:   43.839s
     Rate:      22810.910 insert/sec
     File size: 1026584576 bytes
+
+But we can batch more. Batching at the SQL level, 1000 rows per batch,
+our throughput has increased to **130k** rows per second, so each row
+write takes only **8 microseconds**.
+
+    ./sqlite-bench -batch-count 1000 -batch-size 1000 -row-size 1000 -journal-mode wal -synchronous normal ./bench.db
+    Inserts:   1000000 rows
+    Elapsed:   7.824s
+    Rate:      127817.265 insert/sec
+    File size: 1026584576 bytes
+
+This is enough to write **11 billion rows** each carrying 4KB a day on
+my laptop. With just `fsync` and none of these optimizations, it’d be
+closer to **10 million**, or a 1000x increase. I’d have to replace my
+SSD once every few days to handle that kind of write bandwidth, but it
+goes to show how much one computer can do these days with a \$250 CPU
+and a \$100 SSD.
 
 # Querying Data
 
@@ -298,8 +384,6 @@ The B-Tree[^5] is the most common index.
 ## How do you have a distributed system with many nodes?
 
 ## How do you
-
-# References
 
 [^1]: https://github.com/sirupsen/napkin-math
 

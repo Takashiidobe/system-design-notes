@@ -1,8 +1,5 @@
 ---
 title: "System Design Notes"
-colorlinks: true
-header-includes: |
-  \renewcommand{\chapterheadstartvskip}{}
 ---
 
 !include chapters/introduction/index.md

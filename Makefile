@@ -21,6 +21,7 @@ HTML_FLAGS =                         \
 
 MD_FLAGS =                           \
 	--metadata title=$(BOOK_NAME)      \
+	--to=gfm                           \
 	--embed-resources                  \
 	--standalone
 
@@ -34,7 +35,6 @@ PDF_FLAGS =                          \
 	-V book=true                       \
 	-V titlepage=true                  \
 	-V classoption=oneside             \
-	-V colorlinks=true                 \
 
 html: phony output/index.html output/book.html
 
